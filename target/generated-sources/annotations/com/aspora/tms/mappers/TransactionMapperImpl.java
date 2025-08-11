@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-08-11T19:34:52+0530",
+    date = "2025-08-11T20:23:01+0530",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.1 (Oracle Corporation)"
 )
 @Component
@@ -20,6 +20,12 @@ public class TransactionMapperImpl implements TransactionMapper {
         }
 
         TransactionResponseDTO transactionResponseDTO = new TransactionResponseDTO();
+
+        if ( transaction.getStatus() != null ) {
+            transactionResponseDTO.setStatus( transaction.getStatus().name() );
+        }
+        transactionResponseDTO.setAmount( transaction.getAmount() );
+        transactionResponseDTO.setCreatedAt( transaction.getCreatedAt() );
 
         return transactionResponseDTO;
     }

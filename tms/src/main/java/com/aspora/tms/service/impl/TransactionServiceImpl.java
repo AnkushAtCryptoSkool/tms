@@ -42,8 +42,8 @@ public class TransactionServiceImpl implements TransactionService {
                 throw new RuntimeException("Unknown payment method");
         }
 
-        Transaction savedTxn = transactionRepo.save(txn);
-        return transactionMapper.toDTO(savedTxn);
+        Transaction savedTxn = transactionRepo.saveAndFlush(txn);
+        return toDTO(savedTxn);
     }
 
     private Transaction handleAccountTransfer(TransactionRequestDTO request) {
@@ -72,5 +72,15 @@ public class TransactionServiceImpl implements TransactionService {
         txn.setUpdatedAt(Instant.now());
 
         return txn;
+    }
+
+    private TransactionResponseDTO toDTO(Transaction txn) {
+        TransactionResponseDTO dto = new TransactionResponseDTO();
+        dto.setTransactionId(txn.getId());
+        dto.setExternalReference(null);
+        dto.setStatus(String.valueOf(txn.getStatus()));
+        dto.setAmount(txn.getAmount());
+        dto.setCreatedAt(txn.getCreatedAt());
+        return dto;
     }
 }

@@ -34,7 +34,7 @@ public class AccountTransferStrategy implements PaymentStrategy {
 
     @Override
     @Transactional
-    public TransactionResponseDTO processPayment(TransactionRequestDTO request) {
+    public synchronized TransactionResponseDTO processPayment(TransactionRequestDTO request) {
         Account from = accountRepo.findById(request.getFromAccountId())
                 .orElseThrow(() -> new ResourceNotFoundException("Source account not found"));
         Account to = accountRepo.findById(request.getToAccountId())
