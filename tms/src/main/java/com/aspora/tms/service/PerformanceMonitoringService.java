@@ -3,8 +3,8 @@ package com.aspora.tms.service;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Timer;
 import io.micrometer.core.instrument.MeterRegistry;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.atomic.AtomicLong;
@@ -16,7 +16,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Tracks concurrent processing, throughput, and response times.
  */
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class PerformanceMonitoringService {
 
@@ -31,6 +30,7 @@ public class PerformanceMonitoringService {
     private final AtomicInteger maxConcurrentTransactions = new AtomicInteger(0);
     private final ConcurrentHashMap<String, AtomicInteger> methodConcurrencyMap = new ConcurrentHashMap<>();
 
+    @Autowired
     public PerformanceMonitoringService(MeterRegistry meterRegistry) {
         this.meterRegistry = meterRegistry;
         
@@ -70,7 +70,10 @@ public class PerformanceMonitoringService {
      * Record transaction completion.
      */
     public void recordTransactionComplete(String methodName, long processingTimeMs) {
-        methodConcurrencyMap.get(methodName).decrementAndGet();
+        AtomicInteger counter = methodConcurrencyMap.get(methodName);
+        if (counter != null) {
+            counter.decrementAndGet();
+        }
         totalTransactionsCounter.increment();
         totalProcessingTime.addAndGet(processingTimeMs);
         
@@ -103,7 +106,7 @@ public class PerformanceMonitoringService {
      * Get average processing time.
      */
     public double getAverageProcessingTime() {
-        long total = totalTransactionsCounter.count();
+        long total = (long) totalTransactionsCounter.count();
         return total > 0 ? (double) totalProcessingTime.get() / total : 0.0;
     }
 
